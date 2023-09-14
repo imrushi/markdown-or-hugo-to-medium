@@ -1,0 +1,24 @@
+name: "hugo to medium"
+description: "Push hugo markdown post to medium"
+
+inputs:
+  markdownOrHugo:
+    description: "Specify is it normal Markdown or Hugo Markdown"
+    required: true
+    default: markdown
+  shortcodes:
+    description: "Shortcodes objects"
+    required: false
+  replaceHyperlinkToLink:
+    description: "Replace hyperlink to link for medium cards"
+    required: false
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    - runs: ./convertAndPush -markdownOrHugo=${{ inputs.markdownOrHugo }} -shortcodes=${{ inputs.shortcodes }} -replaceHyperlinkToLink=${{ inputs.replaceHyperlinkToLink }}
+      shell: bash
+branding:
+  icon: "book-open"
+  color: "blue"
