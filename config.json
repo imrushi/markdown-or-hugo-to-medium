@@ -1,0 +1,17 @@
+[
+    {
+      "name": "code",
+      "regex": "/r\\g",
+      "replace": "```"
+    },
+    {
+      "name": "test",
+      "regex": "/r\\g",
+      "replace": "```"
+    },
+    {
+      "name": "test",
+      "regex": "/r\\g",
+      "replace": "```"
+    }
+  ]
