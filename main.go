@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,20 +32,40 @@ type ShortCodes struct {
 
 type MediumPostPayload struct {
 	Title         string   `json:"title"`
-	ContentFormat string   `json:"content_format"`
+	ContentFormat string   `json:"contentFormat"`
 	Content       string   `json:"content,omitempty"`
-	PublishStatus string   `json:"publish_status,omitempty"`
+	PublishStatus string   `json:"publishStatus,omitempty"`
 	Tags          []string `json:"tags,omitempty"`
 }
 
 func postToMedium(payload []byte) {
 	fmt.Println("payload: ", string(payload))
-	// resp, err := http.Post(mediumURL+"/v1/users/"+authorID+"/posts", "application/json", bytes.NewBuffer(payload))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	bearer := "Bearer " + os.Getenv("ACCESS_TOKEN")
 
-	// defer resp.Body.Close()
+	// create new request using HTTP
+	req, err := http.NewRequest("POST", mediumURL+"/v1/users/"+authorID+"/posts", bytes.NewBuffer(payload))
+	if err != nil {
+		log.Fatalf("request err: %v", err)
+	}
+
+	// Add authorization header to the req
+	req.Header.Add("Authorization", bearer)
+	req.Header.Set("Content-Type", "application/json")
+	log.Println(req.Body)
+	// Send req using http client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+	log.Println(string([]byte(body)))
 }
 
 func getLastCommitMessage() string {
@@ -94,7 +117,7 @@ func main() {
 	switch markdownOrHugo {
 	case "markdown":
 		commitMsg := getLastCommitMessage()
-		// commitMsg := "PUBLISH: test.md"
+		// commitMsg := "PUBLISH: test-tl.md"
 		if strings.Contains(commitMsg, "PUBLISH") {
 			// Extract Post Name from Commit
 			postNameWithExt := strings.TrimSpace(strings.SplitAfter(commitMsg, "PUBLISH:")[1])
