@@ -51,7 +51,7 @@ type Frontmatter struct {
 
 // Post to medium
 func postToMedium(payload []byte) {
-	fmt.Println("payload: ", string(payload))
+	// fmt.Println("payload: ", string(payload))
 	bearer := "Bearer " + accessToken
 
 	// create new request using HTTP
@@ -175,6 +175,19 @@ func parseHeader(mdContent string) (string, string, []string) {
 	return mdContent, fm.Title, fm.Tags
 }
 
+func replaceShortCodes(s ShortCodes, mdContent string) string {
+	shortCodeStart := regexp.MustCompile(fmt.Sprintf("{{< %s[^>]*>}}", s.Name))
+	shortCodeEnd := regexp.MustCompile(fmt.Sprintf("{{< /%s >}}", s.Name))
+	if s.Regex != "" {
+		shortCodeStart = regexp.MustCompile(s.Regex)
+	}
+
+	replaceMdContent := shortCodeStart.ReplaceAllString(mdContent, s.Replace)
+	replaceMdContent = shortCodeEnd.ReplaceAllString(replaceMdContent, s.Replace)
+
+	return replaceMdContent
+}
+
 func init() {
 
 	githubWorkspace = os.Getenv("GITHUB_WORKSPACE")
@@ -219,7 +232,7 @@ func main() {
 		if strings.Contains(commitMsg, "PUBLISH") {
 			// Extract Post Name from Commit
 			postNameWithExt, postName := extractPostName(commitMsg)
-			fmt.Println("post name: ", postName)
+			// fmt.Println("post name: ", postName)
 
 			// Extract/Get Content
 			walkFunc := func(path string, d fs.DirEntry, err error) error {
@@ -228,7 +241,7 @@ func main() {
 					return err
 				}
 
-				fmt.Println(path)
+				// fmt.Println(path)
 				if strings.Contains(path, postNameWithExt) {
 					content, err := os.ReadFile(path)
 					if err != nil {
@@ -273,7 +286,7 @@ func main() {
 					return err
 				}
 
-				fmt.Println(path)
+				// fmt.Println(path)
 				if strings.Contains(path, postNameWithExt) {
 					// 2. Read markdown file
 					content, err := os.ReadFile(path)
@@ -287,12 +300,24 @@ func main() {
 					fmt.Println("Title: ", title)
 					fmt.Println("Tags: ", tags)
 
-					payloadData := MediumPostPayload{Title: postName, ContentFormat: "markdown", Content: string(data), PublishStatus: "draft"}
-					_, err = json.Marshal(payloadData)
+					if title == "" {
+						title = postName
+					}
+
+					// 4. replace all shortcodes from post.
+					config := readJsonConfig(shortCodesFileName)
+
+					for _, s := range config {
+						data = replaceShortCodes(s, data)
+					}
+
+					payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: "draft", Tags: tags}
+					marshalData, err := json.Marshal(payloadData)
 					if err != nil {
 						log.Fatal(err)
 					}
-					// postToMedium(marshalData)
+					// 5. call API to post on Medium
+					postToMedium(marshalData)
 					return nil
 				}
 
@@ -310,11 +335,9 @@ func main() {
 				log.Fatalf("Error during directory traversal: %v", err)
 			}
 		}
+		log.Println("Post successful!")
 
-		// 4. replace all shortcodes from post.
-		// 5. call API to post on Medium
 	}
-	config := readJsonConfig(shortCodesFileName)
 
-	fmt.Println(config, markdownOrHugo, replaceHyperlinkToLink)
+	// fmt.Println(markdownOrHugo, replaceHyperlinkToLink)
 }
