@@ -119,12 +119,30 @@ func readJsonConfig(shortCodesFileName string) []ShortCodes {
 	return config
 }
 
-func extractPostName(commitMsg string) (string, string) {
-	postNameWithExt := strings.TrimSpace(strings.SplitAfter(commitMsg, "PUBLISH:")[1])
-	postNameWithDash := strings.Split(postNameWithExt, ".")[0]
-	c := cases.Title(language.Und)
-	postName := c.String(strings.Join(strings.Split(postNameWithDash, "-"), " "))
-	return postNameWithExt, postName
+func extractPostName(commitMsg string) ([]string, []string) {
+	var (
+		postNameSlice        []string
+		postNameWithExtSlice []string
+	)
+
+	if commitMsg == "" || !strings.Contains(commitMsg, "PUBLISH") {
+		return postNameSlice, postNameWithExtSlice
+	}
+
+	f := func(c rune) bool {
+		return c == ','
+	}
+	postNames := strings.SplitAfter(commitMsg, "PUBLISH:")[1]
+	sliceOfPostName := strings.FieldsFunc(postNames, f)
+	for _, val := range sliceOfPostName {
+		postNameWithExt := strings.TrimSpace(val)
+		postNameWithExtSlice = append(postNameWithExtSlice, postNameWithExt)
+		postNameWithDash := strings.Split(postNameWithExt, ".")[0]
+		c := cases.Title(language.Und)
+		postName := c.String(strings.Join(strings.Split(postNameWithDash, "-"), " "))
+		postNameSlice = append(postNameSlice, postName)
+	}
+	return postNameWithExtSlice, postNameSlice
 }
 
 func parseHeader(mdContent string) (string, string, []string) {
@@ -226,51 +244,52 @@ func main() {
 	flag.Parse()
 
 	commitMsg := getLastCommitMessage()
-	// commitMsg := "PUBLISH: json.md"
+	// commitMsg := "PUBLISH: test.md, noob.md"
 	switch markdownOrHugo {
 	case "markdown":
 		if strings.Contains(commitMsg, "PUBLISH") {
 			// Extract Post Name from Commit
 			postNameWithExt, postName := extractPostName(commitMsg)
 			// fmt.Println("post name: ", postName)
-
-			// Extract/Get Content
-			walkFunc := func(path string, d fs.DirEntry, err error) error {
-				if err != nil {
-					log.Fatalf("Error walking directory: %v", err)
-					return err
-				}
-
-				// fmt.Println(path)
-				if strings.Contains(path, postNameWithExt) {
-					content, err := os.ReadFile(path)
+			for i := 0; i < len(postName); i++ {
+				// Extract/Get Content
+				walkFunc := func(path string, d fs.DirEntry, err error) error {
 					if err != nil {
-						log.Fatalf("Error reading file: %v", err)
+						log.Fatalf("Error walking directory: %v", err)
+						return err
 					}
-					payloadData := MediumPostPayload{Title: postName, ContentFormat: "markdown", Content: string(content), PublishStatus: "draft"}
-					marshalData, err := json.Marshal(payloadData)
-					if err != nil {
-						log.Fatal(err)
+
+					// fmt.Println(path)
+					if strings.Contains(path, postNameWithExt[i]) {
+						content, err := os.ReadFile(path)
+						if err != nil {
+							log.Fatalf("Error reading file: %v", err)
+						}
+						payloadData := MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: "draft"}
+						marshalData, err := json.Marshal(payloadData)
+						if err != nil {
+							log.Fatal(err)
+						}
+						postToMedium(marshalData)
+						return nil
 					}
-					postToMedium(marshalData)
+
+					// Check if it's a directory
+					// if d.IsDir() {
+					// 	fmt.Println(" (directory)")
+					// }
+
 					return nil
 				}
 
-				// Check if it's a directory
-				// if d.IsDir() {
-				// 	fmt.Println(" (directory)")
-				// }
+				// Start walking the directory and its subdirectories
+				err := filepath.WalkDir(postPath, walkFunc)
+				if err != nil {
+					log.Fatalf("Error during directory traversal: %v", err)
+				}
 
-				return nil
+				log.Println("Post successful!")
 			}
-
-			// Start walking the directory and its subdirectories
-			err := filepath.WalkDir(postPath, walkFunc)
-			if err != nil {
-				log.Fatalf("Error during directory traversal: %v", err)
-			}
-
-			log.Println("Post successful!")
 		}
 	default:
 		// Hugo
@@ -279,65 +298,65 @@ func main() {
 		if strings.Contains(commitMsg, "PUBLISH") {
 			postNameWithExt, postName := extractPostName(commitMsg)
 
-			// Extract/Get Content
-			walkFunc := func(path string, d fs.DirEntry, err error) error {
-				if err != nil {
-					log.Fatalf("Error walking directory: %v", err)
-					return err
-				}
-
-				// fmt.Println(path)
-				if strings.Contains(path, postNameWithExt) {
-					// 2. Read markdown file
-					content, err := os.ReadFile(path)
+			for i := 0; i < len(postName); i++ {
+				// Extract/Get Content
+				walkFunc := func(path string, d fs.DirEntry, err error) error {
 					if err != nil {
-						log.Fatalf("Error reading file: %v", err)
-					}
-					data := string(content[:])
-					// 3. Remove frontmatter part
-					data, title, tags := parseHeader(data)
-
-					fmt.Println("Title: ", title)
-					fmt.Println("Tags: ", tags)
-
-					if title == "" {
-						title = postName
+						log.Fatalf("Error walking directory: %v", err)
+						return err
 					}
 
-					// 4. replace all shortcodes from post.
-					config := readJsonConfig(shortCodesFileName)
+					// fmt.Println(path)
+					if strings.Contains(path, postNameWithExt[i]) {
+						// 2. Read markdown file
+						content, err := os.ReadFile(path)
+						if err != nil {
+							log.Fatalf("Error reading file: %v", err)
+						}
+						data := string(content[:])
+						// 3. Remove frontmatter part
+						data, title, tags := parseHeader(data)
 
-					for _, s := range config {
-						data = replaceShortCodes(s, data)
+						fmt.Println("Title: ", title)
+						fmt.Println("Tags: ", tags)
+
+						if title == "" {
+							title = postName[i]
+						}
+
+						// 4. replace all shortcodes from post.
+						config := readJsonConfig(shortCodesFileName)
+
+						for _, s := range config {
+							data = replaceShortCodes(s, data)
+						}
+
+						payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: "draft", Tags: tags}
+						marshalData, err := json.Marshal(payloadData)
+						if err != nil {
+							log.Fatal(err)
+						}
+						// 5. call API to post on Medium
+						postToMedium(marshalData)
+						// fmt.Println(string(data))
+						return nil
 					}
 
-					payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: "draft", Tags: tags}
-					marshalData, err := json.Marshal(payloadData)
-					if err != nil {
-						log.Fatal(err)
-					}
-					// 5. call API to post on Medium
-					postToMedium(marshalData)
+					// Check if it's a directory
+					// if d.IsDir() {
+					// 	fmt.Println(" (directory)")
+					// }
+
 					return nil
 				}
 
-				// Check if it's a directory
-				// if d.IsDir() {
-				// 	fmt.Println(" (directory)")
-				// }
-
-				return nil
+				// Start walking the directory and its subdirectories
+				err := filepath.WalkDir(postPath, walkFunc)
+				if err != nil {
+					log.Fatalf("Error during directory traversal: %v", err)
+				}
 			}
-
-			// Start walking the directory and its subdirectories
-			err := filepath.WalkDir(postPath, walkFunc)
-			if err != nil {
-				log.Fatalf("Error during directory traversal: %v", err)
-			}
+			log.Println("Post successful!")
 		}
-		log.Println("Post successful!")
-
 	}
-
-	// fmt.Println(markdownOrHugo, replaceHyperlinkToLink)
 }
