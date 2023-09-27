@@ -1,4 +1,4 @@
-module markdown-or-hugo-to-medium
+module github.com/imrushi/markdown-or-hugo-to-medium
 
 go 1.21
 
