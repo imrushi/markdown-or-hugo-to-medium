@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gopkg.in/src-d/go-git.v4"
@@ -28,6 +28,7 @@ var (
 	postDir         string
 	postPath        string
 	accessToken     string
+	log             *logrus.Logger
 )
 
 type ShortCodes struct {
@@ -63,12 +64,12 @@ func postToMedium(payload []byte) {
 	// Add authorization header to the req
 	req.Header.Add("Authorization", bearer)
 	req.Header.Set("Content-Type", "application/json")
-	log.Println(req.Body)
+	// log.Println(req.Body)
 	// Send req using http client
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("Error on response.\n[ERROR] -", err)
+		log.Error("Error on response.\n[ERROR] -", err)
 	}
 
 	defer resp.Body.Close()
@@ -76,9 +77,9 @@ func postToMedium(payload []byte) {
 	if resp.StatusCode != http.StatusOK {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("Error while reading the response bytes:", err)
+			log.Error("Error while reading the response bytes:", err)
 		}
-		log.Println(string([]byte(body))+"\n Status-Code: ", resp.StatusCode)
+		log.Info(string([]byte(body))+"\n Status-Code: ", resp.StatusCode)
 		return
 	}
 }
@@ -207,6 +208,14 @@ func replaceShortCodes(s ShortCodes, mdContent string) string {
 }
 
 func init() {
+	log = &logrus.Logger{
+		Out: os.Stdout,
+		Formatter: &logrus.TextFormatter{
+			ForceColors:   true,
+			FullTimestamp: true,
+		},
+		Level: logrus.InfoLevel,
+	}
 
 	githubWorkspace = os.Getenv("GITHUB_WORKSPACE")
 	if githubWorkspace == "" {
@@ -238,10 +247,10 @@ func main() {
 	var frontMatterFormat string
 	var draft bool
 
-	flag.StringVar(&markdownOrHugo, "markdownOrHugo", "markdown", "Set the flag for parsing hugo markdown or simple markdown. [hugo, markdown]")
-	flag.StringVar(&shortCodesFileName, "shortCodesConfigFile", "", "Pass JSON config file for parsing shortcode to markdown")
+	flag.StringVar(&markdownOrHugo, "markdown-or-hugo", "markdown", "Set the flag for parsing hugo markdown or simple markdown. [hugo, markdown]")
+	flag.StringVar(&shortCodesFileName, "shortcodes-config-file", "", "Pass JSON config file for parsing shortcode to markdown")
 	flag.StringVar(&frontMatterFormat, "frontmatter", "yaml", "select frontmatter format [yaml, toml, json]")
-	flag.BoolVar(&replaceHyperlinkToLink, "replaceHyperlinkToLink", false, "replace markdown hyperlink syntax with just link")
+	flag.BoolVar(&replaceHyperlinkToLink, "replace-hyperlink-to-link", false, "replace markdown hyperlink syntax with just link")
 	flag.BoolVar(&draft, "draft", false, "publish as a draft on medium")
 	flag.Parse()
 
@@ -250,8 +259,8 @@ func main() {
 		draftPub = "public"
 	}
 
-	commitMsg := getLastCommitMessage()
-	// commitMsg := "PUBLISH: test.md, noob.md"
+	// commitMsg := getLastCommitMessage()
+	commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
 	switch markdownOrHugo {
 	case "markdown":
 		if strings.Contains(commitMsg, "PUBLISH") {
@@ -295,7 +304,7 @@ func main() {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
 
-				log.Println("Post successful!")
+				log.Info("Post successful!")
 			}
 		}
 	default:
@@ -324,8 +333,8 @@ func main() {
 						// 3. Remove frontmatter part
 						data, title, tags := parseHeader(data)
 
-						fmt.Println("Title: ", title)
-						fmt.Println("Tags: ", tags)
+						log.Info("Title: ", title)
+						log.Info("Tags: ", tags)
 
 						if title == "" {
 							title = postName[i]
@@ -363,7 +372,7 @@ func main() {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
 			}
-			log.Println("Post successful!")
+			log.Info("Post successful!")
 		}
 	}
 }
