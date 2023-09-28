@@ -1,23 +1,47 @@
-name: "hugo to medium"
+name: "Markdown Or Hugo To Medium"
 description: "Push hugo markdown post to medium"
 
 inputs:
   markdownOrHugo:
-    description: "Specify is it normal Markdown or Hugo Markdown"
+    description: "Specify is it Markdown or Hugo Markdown"
     required: true
     default: markdown
   shortcodes:
-    description: "Shortcodes objects"
+    description: "Shortcodes JSON config file location"
     required: false
   replaceHyperlinkToLink:
     description: "Replace hyperlink to link for medium cards"
+    required: false
+    default: false
+  frontmatterFormat:
+    description: "Select frontmatter format [yaml, toml]"
+    required: false
+    default: "yaml"
+  draft:
+    description: "Publish as a draft on Medium"
     required: false
     default: false
 
 runs:
   using: "composite"
   steps:
-    - runs: ./convertAndPush -markdownOrHugo=${{ inputs.markdownOrHugo }} -shortcodes=${{ inputs.shortcodes }} -replaceHyperlinkToLink=${{ inputs.replaceHyperlinkToLink }}
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+      
+    - name: Set Up HugoToMedium Binary
+      run: |
+        chmod +x fetch-binary.sh
+        ./fetch-binary.sh
+      shell: bash
+
+    - name: Run HugoToMedium
+      runs: |
+        ./HugoToMedium \
+        -markdown-or-hugo=${{ inputs.markdownOrHugo }} \
+        -shortcodes-config-file=${{ inputs.shortcodes }} \
+        -replace-hyperlink-to-link=${{ inputs.replaceHyperlinkToLink }} \
+        -frontmatter=${{ inputs.frontmatterFormat }} \
+        -draft=${{ inputs.draft }}
       shell: bash
 branding:
   icon: "book-open"
