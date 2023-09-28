@@ -51,7 +51,7 @@ type Frontmatter struct {
 }
 
 // Post to medium
-func postToMedium(payload []byte) {
+func postToMedium(payload []byte) int {
 	// fmt.Println("payload: ", string(payload))
 	bearer := "Bearer " + accessToken
 
@@ -79,9 +79,13 @@ func postToMedium(payload []byte) {
 		if err != nil {
 			log.Error("Error while reading the response bytes:", err)
 		}
-		log.Info(string([]byte(body))+"\n Status-Code: ", resp.StatusCode)
-		return
+
+		if resp.StatusCode > 400 && resp.StatusCode < 600 {
+			log.Error(string([]byte(body))+"\n Status-Code: ", resp.StatusCode)
+		}
+		return resp.StatusCode
 	}
+	return resp.StatusCode
 }
 
 // Returns Last Git Commit Message
@@ -259,10 +263,11 @@ func main() {
 		draftPub = "public"
 	}
 
-	// commitMsg := getLastCommitMessage()
-	commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
+	commitMsg := getLastCommitMessage()
+	// commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
 	switch markdownOrHugo {
 	case "markdown":
+		var postRespCode int
 		if strings.Contains(commitMsg, "PUBLISH") {
 			// Extract Post Name from Commit
 			postNameWithExt, postName := extractPostName(commitMsg)
@@ -286,7 +291,7 @@ func main() {
 						if err != nil {
 							log.Fatal(err)
 						}
-						postToMedium(marshalData)
+						postRespCode = postToMedium(marshalData)
 						return nil
 					}
 
@@ -304,10 +309,13 @@ func main() {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
 
-				log.Info("Post successful!")
+				if postRespCode == http.StatusOK {
+					log.Info("Post successful!")
+				}
 			}
 		}
 	default:
+		var postRespCode int
 		// Hugo
 		// Set environment variable for default post path: POST_PATH
 		// 1. Read the blog post file - details of file name and push will be in commit like - Publish: filename.md
@@ -353,7 +361,7 @@ func main() {
 							log.Fatal(err)
 						}
 						// 5. call API to post on Medium
-						postToMedium(marshalData)
+						postRespCode = postToMedium(marshalData)
 						// fmt.Println(string(data))
 						return nil
 					}
@@ -371,8 +379,11 @@ func main() {
 				if err != nil {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
+
+				if postRespCode == http.StatusOK {
+					log.Info("Post successful!")
+				}
 			}
-			log.Info("Post successful!")
 		}
 	}
 }
