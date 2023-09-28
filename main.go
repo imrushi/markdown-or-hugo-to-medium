@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	mediumURL       string = "https://api.medium.com/v1/users/"
+	mediumURL       string = "https://api.medium.com/v1/"
 	authorID        string
 	githubWorkspace string
 	postDir         string
@@ -54,9 +54,24 @@ type Frontmatter struct {
 func postToMedium(payload []byte) int {
 	// fmt.Println("payload: ", string(payload))
 	bearer := "Bearer " + accessToken
+	client := &http.Client{}
+
+	getUserReq, err := http.NewRequest("GET", mediumURL+"me", nil)
+	if err != nil {
+		log.Fatalf("get request err: %v", err)
+	}
+
+	getUserReq.Header.Add("Authorization", bearer)
+
+	getResp, err := client.Do(getUserReq)
+	if err != nil {
+		log.Error("Error on response.\n[ERROR] -", err)
+	}
+
+	log.Infof("get response: %v", getResp)
 
 	// create new request using HTTP
-	req, err := http.NewRequest("POST", mediumURL+authorID+"/posts", bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", mediumURL+"users/"+authorID+"/posts", bytes.NewBuffer(payload))
 	if err != nil {
 		log.Fatalf("request err: %v", err)
 	}
@@ -65,8 +80,8 @@ func postToMedium(payload []byte) int {
 	req.Header.Add("Authorization", bearer)
 	req.Header.Set("Content-Type", "application/json")
 	// log.Println(req.Body)
+
 	// Send req using http client
-	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Error("Error on response.\n[ERROR] -", err)
