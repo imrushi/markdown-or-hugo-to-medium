@@ -236,12 +236,19 @@ func main() {
 	var markdownOrHugo string
 	var replaceHyperlinkToLink bool
 	var frontMatterFormat string
+	var draft bool
 
 	flag.StringVar(&markdownOrHugo, "markdownOrHugo", "markdown", "Set the flag for parsing hugo markdown or simple markdown. [hugo, markdown]")
 	flag.StringVar(&shortCodesFileName, "shortCodesConfigFile", "", "Pass JSON config file for parsing shortcode to markdown")
 	flag.StringVar(&frontMatterFormat, "frontmatter", "yaml", "select frontmatter format [yaml, toml, json]")
 	flag.BoolVar(&replaceHyperlinkToLink, "replaceHyperlinkToLink", false, "replace markdown hyperlink syntax with just link")
+	flag.BoolVar(&draft, "draft", false, "publish as a draft on medium")
 	flag.Parse()
+
+	draftPub := "draft"
+	if draft {
+		draftPub = "public"
+	}
 
 	commitMsg := getLastCommitMessage()
 	// commitMsg := "PUBLISH: test.md, noob.md"
@@ -265,7 +272,7 @@ func main() {
 						if err != nil {
 							log.Fatalf("Error reading file: %v", err)
 						}
-						payloadData := MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: "draft"}
+						payloadData := MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: draftPub}
 						marshalData, err := json.Marshal(payloadData)
 						if err != nil {
 							log.Fatal(err)
@@ -331,7 +338,7 @@ func main() {
 							data = replaceShortCodes(s, data)
 						}
 
-						payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: "draft", Tags: tags}
+						payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: draftPub, Tags: tags}
 						marshalData, err := json.Marshal(payloadData)
 						if err != nil {
 							log.Fatal(err)
