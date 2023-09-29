@@ -14,4 +14,4 @@
 
 ### Bug Fixes
 
-- Remove fetch binary ([109d2a2](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/109d2a269a7d4e293876bd30107a8a534424c078))
+- Adds bash script tag ([2a44a43](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/2a44a436a8b92f1fa0a31183358ede85c1487b44))
