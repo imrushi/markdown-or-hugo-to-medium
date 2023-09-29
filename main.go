@@ -319,8 +319,8 @@ func main() {
 
 	user := getUser()
 	authorID = user.ID
-	// commitMsg := getLastCommitMessage()
-	commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
+	commitMsg := getLastCommitMessage()
+	// commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
 	switch markdownOrHugo {
 	case "markdown":
 		var postRespCode int
