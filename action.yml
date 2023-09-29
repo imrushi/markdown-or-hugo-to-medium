@@ -39,10 +39,12 @@ runs:
 
     - name: Install dependencies
       run: go get .
+      shell: bash
 
     - name: Build
       run: go build -v -o HugoToMedium main.go
-
+      shell: bash
+      
     - name: Run HugoToMedium
       run: |
         ./HugoToMedium \
