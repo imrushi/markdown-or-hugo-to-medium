@@ -1,20 +1,80 @@
-# Hugo to Medium
+# Hugo Or Markdown to Medium
 
-This github action will publish or create draft on your Medium account.
+The "Hugo Or Markdown To Medium" action automates the process of pushing Hugo markdown posts or regular markdown posts to Medium. It simplifies the publishing workflow by providing options for converting and formatting your content for Medium.
 
-sample running command:
-`GITHUB_WORKSPACE=. POST_DIR=posts go run main.go -shortCodesConfigFile ./config.json`
+## Triggering the Action
 
-````
-[
+The action will push to Medium when your Git commit message contains the "PUBLISH" keyword. For example, if you want to push a Hugo or Markdown post to Medium, use a commit message like this:
+
+- Single post: `PUBLISH: file-name.md`
+- Multiple posts: `PUBLISH: file1.md, file2.md, ... fileN.md`
+
+## Inputs
+- **markdownOrHugo** (required)
+  - Specify whether the content is in Markdown or Hugo Markdown format.
+  - Default: "markdown"
+- **shortcodes**
+  - JSON config file location for shortcodes. The config should contain an array of objects, where each object defines a shortcode and its replacement. Config file should be present at your root directory of your project.
+  - Default: config.json
+  - Example shortcode config JSON:
+  ```json
+  [
     {
-      "name": "code",
-      "replace": "```"
+      "name": "alert",
+      "regex": "\\{\\{< alert type=\"(.*?)\" >\\}\\}(.*?)\\{\\{< /alert >\\}\\}",
+      "replace": "<div class=\"$1\">$2</div>"
     },
     {
-      "name": "image",
-      "regex": "{{< image src=\"https://media0.giphy.com/media/3orieQcuSiWouzdHq0/giphy.webp\" alt=\"names\" position=\"center\" style=\"border-radius: 8px; width: 320px; height: 230px;\" >}}",
-      "replace": "https://media0.giphy.com/media/3orieQcuSiWouzdHq0/giphy.webp"
+      "name": "figure",
+      "regex": "\\{\\{< figure src=\"(.*?)\" alt=\"(.*?)\" >\\}\\}",
+      "replace": "<figure><img src=\"$1\" alt=\"$2\"></figure>"
     }
-]
-````
+  ]
+  ```
+- **replaceHyperlinkToLink**
+  - Replace hyperlinks with links for Medium cards.
+  - Default: false
+- **frontmatterFormat**
+  - Select the frontmatter format (yaml, toml).
+  - Default: "yaml"
+- **draft**
+  - Publish the post as a draft on Medium.
+  - Default: false
+
+## Environment Variables
+The action uses the following environment variables:
+
+- **POST_DIR**:
+  -Set this variable to specify from which directory the action should take post contents.
+- **ACCESS_TOKEN**:
+- Set this variable to your Medium access token. You can generate an access token from your Medium settings at "Security and apps" -> "Integration token".
+
+**Note**: Store the Access Token securely in your GitHub repository secrets and then use it in your workflow YAML
+
+## Example Usage
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-to-medium:
+    runs-on: ubuntu-latest
+    env:
+      POST_DIR: "path/to/your/post/directory"
+      ACCESS_TOKEN: ${{ secrets.MEDIUM_ACCESS_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Markdown Or Hugo To Medium
+        uses: your_username/markdown-or-hugo-to-medium@v1
+        with:
+          markdownOrHugo: "hugo"
+          shortcodes: "path/to/shortcodes.json"
+          replaceHyperlinkToLink: true
+          frontmatterFormat: "yaml"
+          draft: false
+```
