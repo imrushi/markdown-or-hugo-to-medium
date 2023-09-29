@@ -32,10 +32,16 @@ runs:
     - name: Check out the repository to the runner
       uses: actions/checkout@v4
 
-    - name: Set Up HugoToMedium Binary
-      run: |
-        chmod +x ${{ github.action_path }}/fetch-binary.sh && .${{ github.action_path }}/fetch-binary.sh
-      shell: bash
+    - name: Setup Go 1.21.x
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21.x'
+
+    - name: Install dependencies
+      run: go get .
+
+    - name: Build
+      run: go build -v -o HugoToMedium main.go
 
     - name: Run HugoToMedium
       run: |
