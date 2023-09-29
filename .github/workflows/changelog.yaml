@@ -40,6 +40,6 @@ jobs:
           git checkout -b "$branch" || true
           git add CHANGELOG.md || true
           git commit -m "autogen(docs): regenerate and update changelog" -m "[skip ci]" || true
-          git pull origin master --rebase || true
-          git push origin HEAD:master || true
+          git pull origin main --rebase || true
+          git push origin HEAD:main || true
         shell: bash
