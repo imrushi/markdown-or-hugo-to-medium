@@ -50,25 +50,32 @@ type Frontmatter struct {
 	Tags  []string `yaml:"tags" toml:"tags" json:"tags"`
 }
 
+// User defines a Medium user
+type User struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	ImageURL string `json:"imageUrl"`
+}
+
+// payload defines a struct to represent payloads that are returned from Medium.
+type Envelope struct {
+	Data   User    `json:"data"`
+	Errors []Error `json:"errors,omitempty"`
+}
+
+// Error defines an error received when making a request to the API.
+type Error struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
 // Post to medium
 func postToMedium(payload []byte) int {
 	// fmt.Println("payload: ", string(payload))
-	bearer := "Bearer " + accessToken
+	bearer := fmt.Sprintf("Bearer %s", accessToken)
 	client := &http.Client{}
-
-	getUserReq, err := http.NewRequest("GET", mediumURL+"me", nil)
-	if err != nil {
-		log.Fatalf("get request err: %v", err)
-	}
-
-	getUserReq.Header.Add("Authorization", bearer)
-
-	getResp, err := client.Do(getUserReq)
-	if err != nil {
-		log.Error("Error on response.\n[ERROR] -", err)
-	}
-
-	log.Infof("get response: %v", getResp)
 
 	// create new request using HTTP
 	req, err := http.NewRequest("POST", mediumURL+"users/"+authorID+"/posts", bytes.NewBuffer(payload))
@@ -95,12 +102,49 @@ func postToMedium(payload []byte) int {
 			log.Error("Error while reading the response bytes:", err)
 		}
 
-		if resp.StatusCode > 400 && resp.StatusCode < 600 {
+		if resp.StatusCode >= 400 && resp.StatusCode < 600 {
 			log.Error(string([]byte(body))+"\n Status-Code: ", resp.StatusCode)
 		}
 		return resp.StatusCode
 	}
 	return resp.StatusCode
+}
+
+// get user info from medium
+func getUser() User {
+	bearer := fmt.Sprintf("Bearer %s", accessToken)
+	client := &http.Client{}
+
+	getUserReq, err := http.NewRequest("GET", mediumURL+"me", nil)
+	if err != nil {
+		log.Fatalf("get request err: %v", err)
+	}
+
+	getUserReq.Header.Add("Authorization", bearer)
+
+	getResp, err := client.Do(getUserReq)
+	if err != nil {
+		log.Error("Error on response.\n[ERROR] -", err)
+	}
+
+	defer getResp.Body.Close()
+
+	getBody, err := io.ReadAll(getResp.Body)
+	if err != nil {
+		log.Error("Error while reading the response bytes:", err)
+	}
+
+	if getResp.StatusCode > 400 && getResp.StatusCode < 600 {
+		log.Error(string([]byte(getBody))+"\n Status-Code: ", getResp.StatusCode)
+	}
+
+	var env Envelope
+	if err := json.Unmarshal(getBody, &env); err != nil {
+		log.Fatalf("Could not parse response: %s", err)
+	}
+
+	// log.Infof("get response body : %v", env.Data.ID)
+	return env.Data
 }
 
 // Returns Last Git Commit Message
@@ -246,11 +290,6 @@ func init() {
 		log.Fatalf("POST_DIR environment variable is not set!")
 	}
 
-	authorID = os.Getenv("AUTHOR_ID")
-	if authorID == "" {
-		log.Fatalf("AUTHOR_ID environment variable is not set!")
-	}
-
 	accessToken = os.Getenv("ACCESS_TOKEN")
 	if accessToken == "" {
 		log.Fatalf("ACCESS_TOKEN environment variable is not set!")
@@ -278,8 +317,10 @@ func main() {
 		draftPub = "public"
 	}
 
-	commitMsg := getLastCommitMessage()
-	// commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
+	user := getUser()
+	authorID = user.ID
+	// commitMsg := getLastCommitMessage()
+	commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
 	switch markdownOrHugo {
 	case "markdown":
 		var postRespCode int
@@ -324,8 +365,8 @@ func main() {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
 
-				if postRespCode == http.StatusOK {
-					log.Info("Post successful!")
+				if postRespCode >= 200 && postRespCode < 300 {
+					log.Infof("%v: Post successful!", postName[i])
 				}
 			}
 		}
@@ -395,8 +436,8 @@ func main() {
 					log.Fatalf("Error during directory traversal: %v", err)
 				}
 
-				if postRespCode == http.StatusOK {
-					log.Info("Post successful!")
+				if postRespCode >= 200 && postRespCode < 300 {
+					log.Infof("%v: Post successful!", postName[i])
 				}
 			}
 		}
