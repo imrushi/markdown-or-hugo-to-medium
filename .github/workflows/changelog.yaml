@@ -1,0 +1,23 @@
+name: CI to generate
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+
+# Cancel in-progress runs in current workflow.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' || github.ref_name == 'main' }}
+    steps:
+      - uses: ory/ci/changelog@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
