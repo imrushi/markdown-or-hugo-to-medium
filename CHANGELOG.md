@@ -14,4 +14,4 @@
 
 ### Bug Fixes
 
-- Access fetch-bianry.sh ([ba9a12d](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/ba9a12d8b5739bbd9e5b73fb08a9ec7f135cee97))
+- Run script ([f66be85](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/f66be85136bc954794aa5a35c92ab7f042d1883c))
