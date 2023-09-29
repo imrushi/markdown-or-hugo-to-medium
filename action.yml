@@ -38,18 +38,18 @@ runs:
         go-version: '1.21.x'
 
     - name: Install dependencies and Build
-      run: cd ${{ github.action_path }} && go get . && go build -v -o HugoToMedium main.go
-      shell: bash
-
-    - name: Run HugoToMedium
-      run: |
-        .${{ github.action_path }}/HugoToMedium \
+      run: | 
+        cd ${{ github.action_path }} && \
+        go get . && \
+        go build -o HugoToMedium main.go && \
+        ./HugoToMedium \
         -markdown-or-hugo=${{ inputs.markdownOrHugo }} \
         -shortcodes-config-file=${{ inputs.shortcodes }} \
         -replace-hyperlink-to-link=${{ inputs.replaceHyperlinkToLink }} \
         -frontmatter=${{ inputs.frontmatterFormat }} \
         -draft=${{ inputs.draft }}
       shell: bash
+
 branding:
   icon: "book-open"
   color: "blue"
