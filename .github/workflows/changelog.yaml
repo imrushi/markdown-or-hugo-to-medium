@@ -18,6 +18,28 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.ref_type == 'tag' || github.ref_name == 'main' }}
     steps:
-      - uses: ory/ci/changelog@master
+      - name: Check out the repository to the runner
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '18.x'
+      - name: set up the Git client
+        run: |
+          git config --global user.email "35197703+imrushi@users.noreply.github.com"
+          git config --global user.name "bot"
+        shell: bash
+      - name: Run a changelog script
+        run: ./create_changelog.sh
+      - name: commit the changes
+        if: ${{ github.ref_name == 'main' || github.ref_type == 'tag' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="$(date +%s)"
+          git checkout -b "$branch" || true
+          git add CHANGELOG.md || true
+          git commit -m "autogen(docs): regenerate and update changelog" -m "[skip ci]" || true
+          git pull origin master --rebase || true
+          git push origin HEAD:master || true
+        shell: bash
