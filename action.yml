@@ -34,8 +34,7 @@ runs:
 
     - name: Set Up HugoToMedium Binary
       run: |
-        chmod +x ${{ github.action_path }}/fetch-binary.sh
-        .${{ github.action_path }}/fetch-binary.sh
+        chmod +x ${{ github.action_path }}/fetch-binary.sh && .${{ github.action_path }}/fetch-binary.sh
       shell: bash
 
     - name: Run HugoToMedium
