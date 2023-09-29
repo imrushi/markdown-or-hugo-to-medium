@@ -6,12 +6,12 @@
 **Table of Contents**
 
 - [(2023-09-29)](#2023-09-29)
-  - [Unclassified](#unclassified)
+  - [Bug Fixes](#bug-fixes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # (2023-09-29)
 
-### Unclassified
+### Bug Fixes
 
-- fixes path ([b0ac57a](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/b0ac57a5d910a11929b06eb0d149721890a0807f))
+- Adds inline command ([f30f826](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/f30f82604902878ccf6aeccf02995090d0a647e5))
