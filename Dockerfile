@@ -1,11 +1,11 @@
-FROM golang:1.21
+FROM golang:1.21.1-alpine3.18
 
 # RUN apt-get install git jq curl -y
-RUN go version
+RUN apk add git
 
-COPY . .
+COPY . /home/src
 
-# RUN cd /app && go mod download
+WORKDIR /home/src
 
 RUN GOOS=linux GOARCH=amd64 go build -o HugoToMedium main.go
 
