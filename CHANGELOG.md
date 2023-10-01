@@ -6,12 +6,12 @@
 **Table of Contents**
 
 - [(2023-10-01)](#2023-10-01)
-  - [Unclassified](#unclassified)
+  - [Documentation](#documentation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # (2023-10-01)
 
-### Unclassified
+### Documentation
 
-- Merge branch 'main' of https://github.com/imrushi/markdown-or-hugo-to-medium into main ([41a68db](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/41a68db5d9cf40606277e6d73515cd6f324b4b94))
+- Fix typo ([9acdbf9](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/9acdbf9adfcc0cecc8ca759844f1666179dfdd5d))
