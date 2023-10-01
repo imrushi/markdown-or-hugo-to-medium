@@ -14,4 +14,4 @@
 
 ### Unclassified
 
-- remove package installation ([999fc90](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/999fc90a175d97bf9557dbf56ebcf1fb4f59eb7d))
+- adds go version ([212dd97](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/212dd97cfb16470af47aabfda9afd41f0f643e02))
