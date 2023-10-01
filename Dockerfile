@@ -9,8 +9,6 @@ WORKDIR /home/src
 
 RUN GOOS=linux GOARCH=amd64 go build -o HugoToMedium main.go
 
-RUN chmod +x entrypoint.sh
-
 RUN chmod +x HugoToMedium
 
 ENTRYPOINT [ "/home/src/HugoToMedium" ]
