@@ -1,6 +1,6 @@
-# Hugo Or Markdown to Medium
+# Markdown Or Hugo to Medium
 
-The "Hugo Or Markdown To Medium" action automates the process of pushing Hugo markdown posts or regular markdown posts to Medium. It simplifies the publishing workflow by providing options for converting and formatting your content for Medium.
+The "Markdown Or Hugo To Medium" action automates the process of pushing Hugo markdown posts or regular markdown posts to Medium. It simplifies the publishing workflow by providing options for converting and formatting your content for Medium.
 
 ## Triggering the Action
 
