@@ -5,12 +5,17 @@
 
 **Table of Contents**
 
-- [(2023-10-01)](#2023-10-01)
+- [ (2023-10-01)](#2023-10-01)
+- [1.0.6 (2023-10-01)](#106-2023-10-01)
   - [Unclassified](#unclassified)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# (2023-10-01)
+# [](https://github.com/imrushi/markdown-or-hugo-to-medium/compare/v1.0.6...v) (2023-10-01)
+
+# [1.0.6](https://github.com/imrushi/markdown-or-hugo-to-medium/compare/212dd97cfb16470af47aabfda9afd41f0f643e02...v1.0.6) (2023-10-01)
+
+adds docker action
 
 ### Unclassified
 
