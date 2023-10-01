@@ -6,12 +6,12 @@
 **Table of Contents**
 
 - [(2023-10-01)](#2023-10-01)
-  - [Features](#features)
+  - [Unclassified](#unclassified)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # (2023-10-01)
 
-### Features
+### Unclassified
 
-- Changed composite action to docker ([df3ef9c](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/df3ef9c90578e97df41886cd0c027c485d9f5b7c))
+- remove package installation ([999fc90](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/999fc90a175d97bf9557dbf56ebcf1fb4f59eb7d))
