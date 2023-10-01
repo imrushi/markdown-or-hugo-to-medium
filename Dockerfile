@@ -1,6 +1,7 @@
 FROM golang:1.21
 
 # RUN apt-get install git jq curl -y
+RUN go version
 
 COPY . .
 
