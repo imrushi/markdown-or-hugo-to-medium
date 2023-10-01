@@ -13,4 +13,4 @@ RUN chmod +x entrypoint.sh
 
 RUN chmod +x HugoToMedium
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "/home/src/HugoToMedium" ]
