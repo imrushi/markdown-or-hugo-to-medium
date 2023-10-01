@@ -13,10 +13,10 @@
 
 # [](https://github.com/imrushi/markdown-or-hugo-to-medium/compare/v1.0.6...v) (2023-10-01)
 
-# [1.0.6](https://github.com/imrushi/markdown-or-hugo-to-medium/compare/e74e65f35f36dc94f5090015e44df9ade3f0bbda...v1.0.6) (2023-10-01)
+# [1.0.6](https://github.com/imrushi/markdown-or-hugo-to-medium/compare/4869640e2a067bdfbbef84ac6e600ed221ab2617...v1.0.6) (2023-10-01)
 
 adds docker action
 
 ### Unclassified
 
-- update image ([e74e65f](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/e74e65f35f36dc94f5090015e44df9ade3f0bbda))
+- Merge branch 'main' of https://github.com/imrushi/markdown-or-hugo-to-medium into main ([4869640](https://github.com/imrushi/markdown-or-hugo-to-medium/commit/4869640e2a067bdfbbef84ac6e600ed221ab2617))
