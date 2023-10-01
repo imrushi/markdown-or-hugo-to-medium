@@ -312,9 +312,9 @@ func main() {
 	flag.BoolVar(&draft, "draft", false, "publish as a draft on medium")
 	flag.Parse()
 
-	draftPub := "draft"
+	draftPub := "public"
 	if draft {
-		draftPub = "public"
+		draftPub = "draft"
 	}
 
 	user := getUser()
