@@ -8,7 +8,7 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
 
 - Single post: `PUBLISH: file-name.md`
 - Multiple posts: `PUBLISH: file1.md, file2.md, ... fileN.md`
-- Post All: `PUBLISH: .` or `PUBLISH: all`
+- Publish All posts: `PUBLISH: .` or `PUBLISH: all`
 
 ## Inputs
 
