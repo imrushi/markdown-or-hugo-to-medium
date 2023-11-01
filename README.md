@@ -8,15 +8,19 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
 
 - Single post: `PUBLISH: file-name.md`
 - Multiple posts: `PUBLISH: file1.md, file2.md, ... fileN.md`
+- Post All: `PUBLISH: .` or `PUBLISH: all`
 
 ## Inputs
+
 - **markdownOrHugo** (required)
   - Specify whether the content is in Markdown or Hugo Markdown format.
   - Default: "markdown"
 - **shortcodes**
+
   - JSON config file location for shortcodes. The config should contain an array of objects, where each object defines a shortcode and its replacement. Config file should be present at your root directory of your project.
   - Default: config.json
   - Example shortcode config JSON:
+
   ```json
   [
     {
@@ -31,6 +35,9 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
     }
   ]
   ```
+
+  You can also check my projects shortcode [config file](https://github.com/imrushi/imrushi.github.io/blob/main/shortcodes.json)
+
 - **replaceHyperlinkToLink**
   - Replace hyperlinks with links for Medium cards.
   - Default: false
@@ -42,6 +49,7 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
   - Default: false
 
 ## Environment Variables
+
 The action uses the following environment variables:
 
 - **POST_DIR**:

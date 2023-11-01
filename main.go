@@ -197,6 +197,37 @@ func extractPostName(commitMsg string) ([]string, []string) {
 		return c == ','
 	}
 	postNames := strings.SplitAfter(commitMsg, "PUBLISH:")[1]
+
+	if strings.TrimSpace(postNames) == "." || strings.TrimSpace(postNames) == "all" {
+		// Extract/Get Content
+		walkFunc := func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				log.Fatalf("Error walking directory: %v", err)
+				return err
+			}
+			if strings.ToLower(filepath.Ext(path)) == ".md" {
+				postNameWithExtSlice = append(postNameWithExtSlice, filepath.Base(path))
+			}
+
+			return nil
+		}
+
+		// Start walking the directory and its subdirectories
+		err := filepath.WalkDir(postPath, walkFunc)
+		if err != nil {
+			log.Fatalf("Error during directory traversal: %v", err)
+		}
+
+		for _, val := range postNameWithExtSlice {
+			postNameWithExt := strings.TrimSpace(val)
+			postNameWithDash := strings.Split(postNameWithExt, ".")[0]
+			c := cases.Title(language.Und)
+			postName := c.String(strings.Join(strings.Split(postNameWithDash, "-"), " "))
+			postNameSlice = append(postNameSlice, postName)
+		}
+		return postNameWithExtSlice, postNameSlice
+	}
+
 	sliceOfPostName := strings.FieldsFunc(postNames, f)
 	for _, val := range sliceOfPostName {
 		postNameWithExt := strings.TrimSpace(val)
@@ -327,7 +358,7 @@ func main() {
 		if strings.Contains(commitMsg, "PUBLISH") {
 			// Extract Post Name from Commit
 			postNameWithExt, postName := extractPostName(commitMsg)
-			// fmt.Println("post name: ", postName)
+
 			for i := 0; i < len(postName); i++ {
 				// Extract/Get Content
 				walkFunc := func(path string, d fs.DirEntry, err error) error {
@@ -336,7 +367,6 @@ func main() {
 						return err
 					}
 
-					// fmt.Println(path)
 					if strings.Contains(path, postNameWithExt[i]) {
 						content, err := os.ReadFile(path)
 						if err != nil {
@@ -386,7 +416,6 @@ func main() {
 						return err
 					}
 
-					// fmt.Println(path)
 					if strings.Contains(path, postNameWithExt[i]) {
 						// 2. Read markdown file
 						content, err := os.ReadFile(path)
@@ -418,14 +447,9 @@ func main() {
 						}
 						// 5. call API to post on Medium
 						postRespCode = postToMedium(marshalData)
-						// fmt.Println(string(data))
+
 						return nil
 					}
-
-					// Check if it's a directory
-					// if d.IsDir() {
-					// 	fmt.Println(" (directory)")
-					// }
 
 					return nil
 				}
