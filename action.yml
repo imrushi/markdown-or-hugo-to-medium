@@ -24,7 +24,7 @@ inputs:
 
 runs:
   using: "docker"
-  image: "imrushi/markdown-or-hugo-to-medium:latest"
+  image: "docker://imrushi/markdown-or-hugo-to-medium:latest"
   args:
     - -markdown-or-hugo=${{ inputs.markdownOrHugo }}
     - -shortcodes-config-file=${{ inputs.shortcodes }}
