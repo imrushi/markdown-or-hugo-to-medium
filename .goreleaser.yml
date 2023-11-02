@@ -26,7 +26,7 @@ dockers:
   - image_templates:
       - "imrushi/markdown-or-hugo-to-medium:latest"
       - "imrushi/markdown-or-hugo-to-medium:{{ .Tag }}"
-    dockerfile: Dockerfile
+    dockerfile: Dockefile-goreleaser
     build_flag_templates:
       - "--label=org.opencontainers.image.title={{ .ProjectName }}"
       - "--label=org.opencontainers.image.created={{ .Date }}"

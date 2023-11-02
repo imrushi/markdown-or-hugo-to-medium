@@ -1,0 +1,7 @@
+FROM alpine:3.18
+
+RUN apk add git
+
+COPY md-hugo-to-medium /usr/bin/md-hugo-to-medium
+
+ENTRYPOINT ["md-hugo-to-medium"]
