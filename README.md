@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Markdown Or Hugo To Medium
-        uses: your_username/markdown-or-hugo-to-medium@v1.0.0
+        uses: your_username/markdown-or-hugo-to-medium@v1
         with:
           markdownOrHugo: "hugo"
           shortcodes: "path/to/shortcodes.json"
