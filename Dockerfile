@@ -7,8 +7,8 @@ COPY . /home/src
 
 WORKDIR /home/src
 
-RUN GOOS=linux GOARCH=amd64 go build -o HugoToMedium main.go
+RUN GOOS=linux GOARCH=amd64 go build -o md-hugo-to-medium main.go
 
-RUN chmod +x HugoToMedium
+RUN chmod +x md-hugo-to-medium
 
-ENTRYPOINT [ "/home/src/HugoToMedium" ]
+ENTRYPOINT [ "/home/src/md-hugo-to-medium" ]

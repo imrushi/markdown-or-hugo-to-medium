@@ -1,0 +1,39 @@
+project_name: markdown-or-hugo-to-medium
+
+builds:
+  - id: default
+    main: ./main.go
+    binary: md-hugo-to-medium
+    ldflags:
+      - "-s -w -X main.version={{.Tag}} -X main.commit={{.FullCommit}} -X main.date={{.Date}}"
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - arm
+      - 386
+    goarm:
+      - 6
+      - 7
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+dockers:
+  - image_templates:
+      - "imrushi/markdown-or-hugo-to-medium:latest"
+      - "imrushi/markdown-or-hugo-to-medium:{{ .Tag }}"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source={{ .GitURL }}"
+      - "--platform=linux/amd64"
+
+changelog:
+  sort: asc
