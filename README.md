@@ -47,6 +47,9 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
 - **draft**
   - Publish the post as a draft on Medium.
   - Default: false
+- **canonicalRootUrl**
+  - Canonical link for specifying original article root URL with path of folder to prioritize for search engines (use for cross-posted content). eg. https://example.com/posts/
+  - Default: ""
 
 ## Environment Variables
 
@@ -85,4 +88,5 @@ jobs:
           replaceHyperlinkToLink: false
           frontmatterFormat: "yaml"
           draft: true
+          canonicalRootUrl: "https://example.com/posts" #or https://example.com
 ```
