@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/imrushi/markdown-or-hugo-to-medium/helper"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -43,6 +44,7 @@ type MediumPostPayload struct {
 	Content       string   `json:"content,omitempty"`
 	PublishStatus string   `json:"publishStatus,omitempty"`
 	Tags          []string `json:"tags,omitempty"`
+	CanonicalURL  string   `json:"canonicalUrl,omitempty"`
 }
 
 type Frontmatter struct {
@@ -301,6 +303,13 @@ func replaceShortCodes(s ShortCodes, mdContent string) string {
 	return replaceMdContent
 }
 
+func addURLTrailingSlash(url string) string {
+	if !strings.HasSuffix(url, "/") {
+		url += "/"
+	}
+	return url
+}
+
 func init() {
 	log = &logrus.Logger{
 		Out: os.Stdout,
@@ -334,11 +343,13 @@ func main() {
 	var markdownOrHugo string
 	var replaceHyperlinkToLink bool
 	var frontMatterFormat string
+	var canonicalRootUrl string
 	var draft bool
 
 	flag.StringVar(&markdownOrHugo, "markdown-or-hugo", "markdown", "Set the flag for parsing hugo markdown or simple markdown. [hugo, markdown]")
 	flag.StringVar(&shortCodesFileName, "shortcodes-config-file", "", "Pass JSON config file for parsing shortcode to markdown")
 	flag.StringVar(&frontMatterFormat, "frontmatter", "yaml", "select frontmatter format [yaml, toml, json]")
+	flag.StringVar(&canonicalRootUrl, "canonical-root-url", "", "Canonical link for specifying original article root URL with path of folder to prioritize for search engines (use for cross-posted content). eg. https://example.com/posts/")
 	flag.BoolVar(&replaceHyperlinkToLink, "replace-hyperlink-to-link", false, "replace markdown hyperlink syntax with just link")
 	flag.BoolVar(&draft, "draft", false, "publish as a draft on medium")
 	flag.Parse()
@@ -351,6 +362,7 @@ func main() {
 	user := getUser()
 	authorID = user.ID
 	commitMsg := getLastCommitMessage()
+	ps := helper.NewPathSpec(canonicalRootUrl)
 	// commitMsg := "PUBLISH: go-basics-and-a-dash-of-clean-code.md, lets-go.md"
 	switch markdownOrHugo {
 	case "markdown":
@@ -366,13 +378,22 @@ func main() {
 						log.Fatalf("Error walking directory: %v", err)
 						return err
 					}
-
 					if strings.Contains(path, postNameWithExt[i]) {
 						content, err := os.ReadFile(path)
 						if err != nil {
 							log.Fatalf("Error reading file: %v", err)
 						}
-						payloadData := MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: draftPub}
+						var payloadData MediumPostPayload
+
+						if ps.RootURL != "" && len(ps.RootURL) > 1 {
+							uri := fmt.Sprintf("%s%s", addURLTrailingSlash(ps.RootURL), ps.URLize(strings.Split(postNameWithExt[i], ".")[0]))
+							// canUrl := ps.URLize(uri)
+							log.Info(uri)
+							payloadData = MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: draftPub, CanonicalURL: uri}
+						} else {
+							payloadData = MediumPostPayload{Title: postName[i], ContentFormat: "markdown", Content: string(content), PublishStatus: draftPub}
+						}
+
 						marshalData, err := json.Marshal(payloadData)
 						if err != nil {
 							log.Fatal(err)
@@ -440,7 +461,15 @@ func main() {
 							data = replaceShortCodes(s, data)
 						}
 
-						payloadData := MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: draftPub, Tags: tags}
+						var payloadData MediumPostPayload
+
+						if ps.RootURL != "" && len(ps.RootURL) > 1 {
+							canUrl := fmt.Sprintf("%s%s", addURLTrailingSlash(ps.RootURL), ps.URLize(strings.Split(postNameWithExt[i], ".")[0]))
+							payloadData = MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: draftPub, Tags: tags, CanonicalURL: canUrl}
+						} else {
+							payloadData = MediumPostPayload{Title: title, ContentFormat: "markdown", Content: string(data), PublishStatus: draftPub, Tags: tags}
+						}
+
 						marshalData, err := json.Marshal(payloadData)
 						if err != nil {
 							log.Fatal(err)

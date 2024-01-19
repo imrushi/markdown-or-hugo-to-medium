@@ -138,3 +138,23 @@ Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
 		})
 	}
 }
+
+func TestAddTrailingSlash(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		input  string
+		output string
+	}{
+		{desc: "URL without trailing slash", input: "https://example.com/path", output: "https://example.com/path/"},
+		{desc: "URL with trailing slash", input: "https://example.com/path/", output: "https://example.com/path/"},
+		{desc: "Empty string", input: "", output: "/"},
+		{desc: "Root path", input: "/", output: "/"},
+		{desc: "Single Character", input: "x", output: "x/"},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			result := addURLTrailingSlash(tC.input)
+			assert.Equal(t, tC.output, result)
+		})
+	}
+}
