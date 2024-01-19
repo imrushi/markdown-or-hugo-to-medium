@@ -21,6 +21,10 @@ inputs:
     description: "Publish as a draft on Medium"
     required: false
     default: false
+  canonicalRootUrl:
+    description: "Canonical link for specifying original article root URL with path of folder to prioritize for search engines (use for cross-posted content). eg. https://example.com/posts/"
+    required: false
+    default: ""
 
 runs:
   using: "docker"
@@ -31,6 +35,7 @@ runs:
     - -replace-hyperlink-to-link=${{ inputs.replaceHyperlinkToLink }}
     - -frontmatter=${{ inputs.frontmatterFormat }}
     - -draft=${{ inputs.draft }}
+    - -canonical-root-url=${{ inputs.canonicalRootUrl }}
 
 branding:
   icon: "book-open"
