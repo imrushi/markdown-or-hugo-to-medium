@@ -49,6 +49,9 @@ The action will push to Medium when your Git commit message contains the "PUBLIS
   - Default: false
 - **canonicalRootUrl**
   - Canonical link for specifying original article root URL with path of folder to prioritize for search engines (use for cross-posted content). eg. https://example.com/posts/
+  - Your post name url will be appended to the above root url.
+    eg. postName = this-is-your-post-name , canonicalRootUrl = https://example.com/posts/
+    result :- https://example.com/posts/this-is-your-post-name
   - Default: ""
 
 ## Environment Variables
